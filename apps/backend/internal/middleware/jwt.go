@@ -11,6 +11,10 @@ import (
 
 func EnsureValidToken(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.RequestURI == "/api/register" || r.RequestURI[:11] == "/api/login?" {
+			next.ServeHTTP(w, r)
+			return
+		}
 		token := extractToken(r)
 		if token == "" {
 			http.Error(w, "Unauthorized", http.StatusUnauthorized)

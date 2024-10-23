@@ -33,14 +33,13 @@ RETURNING id, first_name, last_name, email;`
 }
 
 func (u *UsersRepository) GetUserWithEmailPassword(user models.User) (models.User, error) {
-
-	var User models.User
+	var result models.User
 
 	stmt := `SELECT id, first_name, last_name, email FROM users WHERE email=$1 AND password=$2`
-	err := u.db.QueryRow(stmt, user.Email, user.Password).Scan(&User.Id, &User.FirstName, &User.LastName, &User.Email)
+	err := u.db.QueryRow(stmt, user.Email, user.Password).Scan(&result.Id, &result.FirstName, &result.LastName, &result.Email)
 	if err != nil {
 		return models.User{}, err
 	}
 
-	return user, nil
+	return result, nil
 }

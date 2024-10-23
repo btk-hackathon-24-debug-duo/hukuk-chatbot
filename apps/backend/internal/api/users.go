@@ -23,23 +23,23 @@ func NewHandlers(db *sql.DB) *Handlers {
 func (h *Handlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	usersRepo := repository.NewUsersRepository(h.db)
 
-	var user models.User
+	var User models.User
 
-	user.Email = r.URL.Query().Get("email")
-	user.Password = utils.HashPassword(r.URL.Query().Get(("password")))
+	User.Email = r.URL.Query().Get("email")
+	User.Password = utils.HashPassword(r.URL.Query().Get(("password")))
 
-	user, err := usersRepo.GetUserWithEmailPassword(user)
+	result, err := usersRepo.GetUserWithEmailPassword(User)
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if user.Id == "" {
+	if result.Id == "" {
 		utils.JSONError(w, http.StatusUnauthorized, "User is not exists")
 		return
 	}
 
-	tokenString, err := utils.CreateJWTToken(user)
+	tokenString, err := utils.CreateJWTToken(result)
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, err.Error())
 		return
