@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/models"
@@ -21,7 +22,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-var jwtKey = []byte("your_secret_key")
+var jwtKey = []byte(os.Getenv("JWT_PRIV_KEY"))
 
 func NewHandlers(db *sql.DB) *Handlers {
 	return &Handlers{
