@@ -32,15 +32,15 @@ RETURNING id, first_name, last_name, email;`
 	return User, nil
 }
 
-func (u *UsersRepository) GetUserWithEmailPassword(user models.User) (bool, error) {
+func (u *UsersRepository) GetUserWithEmailPassword(user models.User) (models.User, error) {
 
-	var exists bool
+	var User models.User
 
-	stmt := `SELECT 1 FROM users WHERE email=$1 AND password=$2`
-	err := u.db.QueryRow(stmt, user.Email, user.Password).Scan(&exists)
+	stmt := `SELECT id, first_name, last_name, email FROM users WHERE email=$1 AND password=$2`
+	err := u.db.QueryRow(stmt, user.Email, user.Password).Scan(&User.Id, &User.FirstName, &User.LastName, &User.Email)
 	if err != nil {
-		return false, err
+		return models.User{}, err
 	}
 
-	return exists, nil
+	return user, nil
 }

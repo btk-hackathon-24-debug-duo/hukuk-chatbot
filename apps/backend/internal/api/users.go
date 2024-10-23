@@ -4,25 +4,15 @@ import (
 	"database/sql"
 	"encoding/json"
 	"net/http"
-	"os"
-	"time"
 
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/models"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/repository"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/pkg/utils"
-	"github.com/golang-jwt/jwt"
 )
 
 type Handlers struct {
 	db *sql.DB
 }
-
-type Claims struct {
-	User models.User `json:"user"`
-	jwt.StandardClaims
-}
-
-var jwtKey = []byte(os.Getenv("JWT_PRIV_KEY"))
 
 func NewHandlers(db *sql.DB) *Handlers {
 	return &Handlers{
@@ -38,18 +28,24 @@ func (h *Handlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	user.Email = r.URL.Query().Get("email")
 	user.Password = utils.HashPassword(r.URL.Query().Get(("password")))
 
-	exists, err := usersRepo.GetUserWithEmailPassword(user)
+	user, err := usersRepo.GetUserWithEmailPassword(user)
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, err.Error())
 		return
 	}
 
-	if !exists {
+	if user.Id == "" {
 		utils.JSONError(w, http.StatusUnauthorized, "User is not exists")
 		return
 	}
 
-	utils.JSONResponse(w, http.StatusOK, exists)
+	tokenString, err := utils.CreateJWTToken(user)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	utils.JSONResponse(w, http.StatusOK, tokenString)
 }
 
 func (h *Handlers) RegisterHandler(w http.ResponseWriter, r *http.Request) {
@@ -66,19 +62,15 @@ func (h *Handlers) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	result, err := usersRepo.CreateUser(user)
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
-	expirationTime := time.Now().Add(24 * time.Hour)
-	claims := &Claims{
-		User: result,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
-		},
+	tokenString, err := utils.CreateJWTToken(result)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, err.Error())
+		return
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
-	tokenString, err := token.SignedString(jwtKey)
 	if err != nil {
 		http.Error(w, "Could not create token", http.StatusInternalServerError)
 		return
