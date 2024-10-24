@@ -24,10 +24,12 @@ func (r *Router) NewRouter() *mux.Router {
 	router := mux.NewRouter()
 
 	router.Use(middleware.CorsMiddleware)
-	router.Use(middleware.EnsureValidToken)
 
 	router.HandleFunc("/api/login", h.LoginHandler).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/api/register", h.RegisterHandler).Methods(http.MethodPost, http.MethodOptions)
+
+	protectedRoutes := router.PathPrefix("/api").Subrouter()
+	protectedRoutes.Use(middleware.EnsureValidToken)
 
 	return router
 }
