@@ -1,19 +1,26 @@
 {
-    "name": "monorepo",
-    "private": true,
-    "scripts": {
-      "build": "turbo build",
-      "dev": "turbo dev",
-      "lint": "turbo lint"
-    },
-    "devDependencies": {
-      "turbo": "^2.2.3"
-    },
-    "engines": {
-      "node": ">=18"
-    },
-    "packageManager": "npm@10.8.3",
-    "workspaces": [
-      "apps/*"
-    ]
+  "name": "monorepo",
+  "private": true,
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx}\"",
+    "check-format": "prettier --check \"**/*.{ts,tsx}\"",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.6",
+    "turbo": "^2.2.3"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "packageManager": "npm@10.8.3",
+  "workspaces": [
+    "apps/*"
+  ],
+  "dependencies": {
+    "prettier": "^3.3.3"
   }
+}
