@@ -8,15 +8,18 @@ import (
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/models"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/repository"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/pkg/utils"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Handlers struct {
-	db *sql.DB
+	db          *sql.DB
+	mongoClient *mongo.Client
 }
 
-func NewHandlers(db *sql.DB) *Handlers {
+func NewHandlers(db *sql.DB, mongo *mongo.Client) *Handlers {
 	return &Handlers{
-		db: db,
+		db:          db,
+		mongoClient: mongo,
 	}
 }
 

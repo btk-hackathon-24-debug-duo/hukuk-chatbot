@@ -6,20 +6,23 @@ import (
 
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/middleware"
 	"github.com/gorilla/mux"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Router struct {
-	db *sql.DB
+	db          *sql.DB
+	mongoClient *mongo.Client
 }
 
-func NewRouter(db *sql.DB) *Router {
+func NewRouter(db *sql.DB, mongo *mongo.Client) *Router {
 	return &Router{
-		db: db,
+		db:          db,
+		mongoClient: mongo,
 	}
 }
 
 func (r *Router) NewRouter() *mux.Router {
-	h := NewHandlers(r.db)
+	h := NewHandlers(r.db, r.mongoClient)
 
 	router := mux.NewRouter()
 
@@ -28,8 +31,10 @@ func (r *Router) NewRouter() *mux.Router {
 	router.HandleFunc("/api/login", h.LoginHandler).Methods(http.MethodGet, http.MethodOptions)
 	router.HandleFunc("/api/register", h.RegisterHandler).Methods(http.MethodPost, http.MethodOptions)
 
-	protectedRoutes := router.PathPrefix("/api").Subrouter()
-	protectedRoutes.Use(middleware.EnsureValidToken)
+	protected := router.PathPrefix("/api").Subrouter()
+	protected.Use(middleware.EnsureValidToken)
+
+	protected.HandleFunc("/chat/message", h.SendMessageHandler).Methods(http.MethodPost, http.MethodOptions)
 
 	return router
 }
