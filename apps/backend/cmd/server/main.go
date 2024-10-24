@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/api"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/pkg/ai"
@@ -23,9 +24,10 @@ type app struct {
 func main() {
 	_ = godotenv.Load()
 
+	time.Sleep(10 * time.Second)
 	port := ":8080"
 
-	Db, err := db.GetDb()
+	Db, err := db.SetupDb()
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)

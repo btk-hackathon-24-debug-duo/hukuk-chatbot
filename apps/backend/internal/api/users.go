@@ -8,25 +8,19 @@ import (
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/models"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/repository"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/pkg/utils"
-	"github.com/google/generative-ai-go/genai"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Handlers struct {
-	db           *sql.DB
-	mongoClient  *mongo.Collection
-	geminiClient *genai.GenerativeModel
+type UserHandlers struct {
+	db *sql.DB
 }
 
-func NewHandlers(db *sql.DB, mongo *mongo.Collection, gemini *genai.GenerativeModel) *Handlers {
-	return &Handlers{
-		db:           db,
-		mongoClient:  mongo,
-		geminiClient: gemini,
+func NewUserHandlers(db *sql.DB) *UserHandlers {
+	return &UserHandlers{
+		db: db,
 	}
 }
 
-func (h *Handlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	usersRepo := repository.NewUsersRepository(h.db)
 
 	var User models.User
@@ -54,7 +48,7 @@ func (h *Handlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	utils.JSONResponse(w, http.StatusOK, tokenString)
 }
 
-func (h *Handlers) RegisterHandler(w http.ResponseWriter, r *http.Request) {
+func (h *UserHandlers) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	usersRepo := repository.NewUsersRepository(h.db)
 

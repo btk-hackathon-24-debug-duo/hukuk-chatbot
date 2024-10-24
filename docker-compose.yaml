@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./apps/backend/
+    ports:
+      - "8080:8080"
+    networks:
+      - app
+    depends_on:
+      - postgres
+    env_file:
+      - ./apps/backend/.env
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: btk
+      POSTGRES_USER: btk
+      POSTGRES_PASSWORD: your-beautiful-password
+      POSTGRES_SSL: off
+    ports:
+      - "5432:5432" 
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U btk"]
+      interval: 1s
+      timeout: 5s
+      retries: 10
+    networks:
+      - app
+
+
+networks:
+  app:
+    driver: bridge 

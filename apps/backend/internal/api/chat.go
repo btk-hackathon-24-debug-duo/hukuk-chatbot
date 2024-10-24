@@ -9,9 +9,22 @@ import (
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/repository"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/pkg/utils"
 	"github.com/google/generative-ai-go/genai"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-func (h *Handlers) SendMessageHandler(w http.ResponseWriter, r *http.Request) {
+type ChatHandlers struct {
+	mongoClient  *mongo.Collection
+	geminiClient *genai.GenerativeModel
+}
+
+func NewChatHandlers(mongo *mongo.Collection, gemini *genai.GenerativeModel) *ChatHandlers {
+	return &ChatHandlers{
+		mongoClient:  mongo,
+		geminiClient: gemini,
+	}
+}
+
+func (h *ChatHandlers) SendMessageHandler(w http.ResponseWriter, r *http.Request) {
 	claims, ok := utils.GetTokenClaims(r)
 	if !ok {
 		utils.JSONError(w, http.StatusUnauthorized, "Token claims missing")
@@ -56,7 +69,7 @@ func (h *Handlers) SendMessageHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (h *Handlers) GetMessages(w http.ResponseWriter, r *http.Request) {
+func (h *ChatHandlers) GetMessages(w http.ResponseWriter, r *http.Request) {
 	claims, ok := utils.GetTokenClaims(r)
 	if !ok {
 		utils.JSONError(w, http.StatusUnauthorized, "Token claims missing")

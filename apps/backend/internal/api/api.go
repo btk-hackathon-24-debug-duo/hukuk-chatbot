@@ -25,7 +25,8 @@ func NewRouter(db *sql.DB, mongo *mongo.Collection, gemini *genai.GenerativeMode
 }
 
 func (r *Router) NewRouter() *mux.Router {
-	h := NewHandlers(r.db, r.mongoClient, r.geminiClient)
+	h := NewUserHandlers(r.db)
+	c := NewChatHandlers(r.mongoClient, r.geminiClient)
 
 	router := mux.NewRouter()
 
@@ -37,8 +38,8 @@ func (r *Router) NewRouter() *mux.Router {
 	protected := router.PathPrefix("/api").Subrouter()
 	protected.Use(middleware.EnsureValidToken)
 
-	protected.HandleFunc("/chat/message", h.SendMessageHandler).Methods(http.MethodPost, http.MethodOptions)
-	protected.HandleFunc("/chat/message", h.GetMessages).Methods(http.MethodGet, http.MethodOptions)
+	protected.HandleFunc("/chat/message", c.SendMessageHandler).Methods(http.MethodPost, http.MethodOptions)
+	protected.HandleFunc("/chat/message", c.GetMessages).Methods(http.MethodGet, http.MethodOptions)
 
 	return router
 }

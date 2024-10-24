@@ -19,7 +19,7 @@ type Config struct {
 	SSLMode  string
 }
 
-func GetDb() (*sql.DB, error) {
+func SetupDb() (*sql.DB, error) {
 	config := Config{
 		Host:     os.Getenv("DB_HOST"),
 		Port:     5432, // Default to 5432 if DB_PORT is not set
@@ -57,13 +57,18 @@ func GetDb() (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to ping database: %w", err)
 	}
 
+	err = SetupTables(sqlDB)
+	if err != nil {
+		return nil, fmt.Errorf("failed to setup tables: %w", err)
+	}
+
 	fmt.Println("Successfully connected to the database")
 
 	return sqlDB, nil
 
 }
 
-func SetupDb(db *sql.DB) error {
+func SetupTables(db *sql.DB) error {
 	stmt := `CREATE TABLE IF NOT EXISTS users ( 
     id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     first_name VARCHAR(255) NOT NULL,
@@ -72,12 +77,13 @@ func SetupDb(db *sql.DB) error {
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-	);`
+);`
 
 	_, err := db.Exec(stmt)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to create users table: %w", err)
 	}
 
 	return nil
+
 }
