@@ -8,18 +8,21 @@ import (
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/models"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/repository"
 	"github.com/btk-hackathon-24-debug-duo/project-setup/pkg/utils"
+	"github.com/google/generative-ai-go/genai"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Handlers struct {
-	db          *sql.DB
-	mongoClient *mongo.Client
+	db           *sql.DB
+	mongoClient  *mongo.Collection
+	geminiClient *genai.GenerativeModel
 }
 
-func NewHandlers(db *sql.DB, mongo *mongo.Client) *Handlers {
+func NewHandlers(db *sql.DB, mongo *mongo.Collection, gemini *genai.GenerativeModel) *Handlers {
 	return &Handlers{
-		db:          db,
-		mongoClient: mongo,
+		db:           db,
+		mongoClient:  mongo,
+		geminiClient: gemini,
 	}
 }
 

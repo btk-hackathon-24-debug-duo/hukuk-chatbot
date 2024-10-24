@@ -5,24 +5,27 @@ import (
 	"net/http"
 
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/middleware"
+	"github.com/google/generative-ai-go/genai"
 	"github.com/gorilla/mux"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Router struct {
-	db          *sql.DB
-	mongoClient *mongo.Client
+	db           *sql.DB
+	mongoClient  *mongo.Collection
+	geminiClient *genai.GenerativeModel
 }
 
-func NewRouter(db *sql.DB, mongo *mongo.Client) *Router {
+func NewRouter(db *sql.DB, mongo *mongo.Collection, gemini *genai.GenerativeModel) *Router {
 	return &Router{
-		db:          db,
-		mongoClient: mongo,
+		db:           db,
+		mongoClient:  mongo,
+		geminiClient: gemini,
 	}
 }
 
 func (r *Router) NewRouter() *mux.Router {
-	h := NewHandlers(r.db, r.mongoClient)
+	h := NewHandlers(r.db, r.mongoClient, r.geminiClient)
 
 	router := mux.NewRouter()
 
@@ -35,6 +38,7 @@ func (r *Router) NewRouter() *mux.Router {
 	protected.Use(middleware.EnsureValidToken)
 
 	protected.HandleFunc("/chat/message", h.SendMessageHandler).Methods(http.MethodPost, http.MethodOptions)
+	protected.HandleFunc("/chat/message", h.GetMessages).Methods(http.MethodGet, http.MethodOptions)
 
 	return router
 }

@@ -7,14 +7,17 @@ import (
 	"os"
 
 	"github.com/btk-hackathon-24-debug-duo/project-setup/internal/api"
+	"github.com/btk-hackathon-24-debug-duo/project-setup/pkg/ai"
 	db "github.com/btk-hackathon-24-debug-duo/project-setup/pkg/database"
+	"github.com/google/generative-ai-go/genai"
 	"github.com/joho/godotenv"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type app struct {
-	db          *sql.DB
-	mongoClient *mongo.Client
+	db           *sql.DB
+	mongoClient  *mongo.Collection
+	geminiClient *genai.GenerativeModel
 }
 
 func main() {
@@ -34,12 +37,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	app := app{
-		db:          Db,
-		mongoClient: mongoClient,
+	geminiClient, err := ai.SetupGemini()
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
 	}
 
-	router := api.NewRouter(app.db, app.mongoClient)
+	app := app{
+		db:           Db,
+		mongoClient:  mongoClient,
+		geminiClient: geminiClient,
+	}
+
+	router := api.NewRouter(app.db, app.mongoClient, app.geminiClient)
 
 	r := router.NewRouter()
 

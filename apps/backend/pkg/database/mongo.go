@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func SetupMongoDB() (*mongo.Client, error) {
+func SetupMongoDB() (*mongo.Collection, error) {
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
 	uri := fmt.Sprintf("mongodb+srv://%s:%s@cluster0.fdgcs.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0",
 		os.Getenv("MONGO_DB_USER_NAME"), os.Getenv("MONGO_DB_PASSWORD"))
@@ -28,5 +28,7 @@ func SetupMongoDB() (*mongo.Client, error) {
 	}
 	fmt.Println("Pinged your deployment. You successfully connected to MongoDB!")
 
-	return client, nil
+	coll := client.Database("chat").Collection("messages")
+
+	return coll, nil
 }
