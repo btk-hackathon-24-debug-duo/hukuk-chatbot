@@ -77,7 +77,15 @@ func SetupTables(db *sql.DB) error {
     password VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);`
+);
+CREATE TABLE IF NOT EXISTS chats (
+    id UUID DEFAULT gen_random_uuid(),
+    user_id UUID NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id, user_id),
+    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+`
 
 	_, err := db.Exec(stmt)
 	if err != nil {

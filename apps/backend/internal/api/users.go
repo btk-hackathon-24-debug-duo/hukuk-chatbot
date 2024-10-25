@@ -25,8 +25,12 @@ func (h *UserHandlers) LoginHandler(w http.ResponseWriter, r *http.Request) {
 
 	var User models.User
 
-	User.Email = r.URL.Query().Get("email")
-	User.Password = utils.HashPassword(r.URL.Query().Get(("password")))
+	if err := json.NewDecoder(r.Body).Decode(&User); err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	User.Password = utils.HashPassword(User.Password)
 
 	result, err := usersRepo.GetUserWithEmailPassword(User)
 	if err != nil {
@@ -68,11 +72,6 @@ func (h *UserHandlers) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 	tokenString, err := utils.CreateJWTToken(result)
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-
-	if err != nil {
-		http.Error(w, "Could not create token", http.StatusInternalServerError)
 		return
 	}
 

@@ -26,20 +26,25 @@ func NewRouter(db *sql.DB, mongo *mongo.Collection, gemini *genai.GenerativeMode
 
 func (r *Router) NewRouter() *mux.Router {
 	h := NewUserHandlers(r.db)
-	c := NewChatHandlers(r.mongoClient, r.geminiClient)
+	c := NewChatHandlers(r.mongoClient, r.geminiClient, r.db)
 
 	router := mux.NewRouter()
 
 	router.Use(middleware.CorsMiddleware)
 
-	router.HandleFunc("/user", h.LoginHandler).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/user", h.RegisterHandler).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/user/login", h.LoginHandler).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/user/register", h.RegisterHandler).Methods(http.MethodPost, http.MethodOptions)
 
 	protected := router.PathPrefix("/api").Subrouter()
 	protected.Use(middleware.EnsureValidToken)
 
 	protected.HandleFunc("/chat/message", c.SendMessageHandler).Methods(http.MethodPost, http.MethodOptions)
 	protected.HandleFunc("/chat/message", c.GetMessages).Methods(http.MethodGet, http.MethodOptions)
+
+	protected.HandleFunc("/chat/firstmessage", c.SendFirstMessageHandler).Methods(http.MethodPost, http.MethodOptions)
+
+	protected.HandleFunc("/chat", c.NewChat).Methods(http.MethodPost, http.MethodOptions)
+	protected.HandleFunc("/chat", c.GetChats).Methods(http.MethodGet, http.MethodOptions)
 
 	protected.HandleFunc("/user/update", h.UpdateUserHandler).Methods(http.MethodPut, http.MethodOptions)
 

@@ -15,7 +15,7 @@ func SetupGemini() (*genai.GenerativeModel, error) {
 		return nil, err
 	}
 
-	model := client.GenerativeModel("gemini-1.5-flash")
+	model := client.GenerativeModel(os.Getenv("AI_MODEL"))
 	model.SystemInstruction = genai.NewUserContent(genai.Text("Sen bir avukat veya hukuk öğrencisine yardım ediyorsun. sorduğu sorulara cevap veriyorsun. cevap verirken kaynaklarını da gösteriyorsun. Emsal kararlar ve yasaları mutlaka göstermelisin. yöntemini ve sürecini anlatmalısın."))
 
 	return model, nil

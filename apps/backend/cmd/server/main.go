@@ -56,11 +56,11 @@ func main() {
 
 	r := router.NewRouter()
 
+	fmt.Println("Server is running on port", port)
+
 	err = http.ListenAndServe(port, r)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	fmt.Println("user actions service started at " + port)
-
 }
