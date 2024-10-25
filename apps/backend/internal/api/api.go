@@ -32,14 +32,16 @@ func (r *Router) NewRouter() *mux.Router {
 
 	router.Use(middleware.CorsMiddleware)
 
-	router.HandleFunc("/api/login", h.LoginHandler).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc("/api/register", h.RegisterHandler).Methods(http.MethodPost, http.MethodOptions)
+	router.HandleFunc("/user", h.LoginHandler).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc("/user", h.RegisterHandler).Methods(http.MethodPost, http.MethodOptions)
 
 	protected := router.PathPrefix("/api").Subrouter()
 	protected.Use(middleware.EnsureValidToken)
 
 	protected.HandleFunc("/chat/message", c.SendMessageHandler).Methods(http.MethodPost, http.MethodOptions)
 	protected.HandleFunc("/chat/message", c.GetMessages).Methods(http.MethodGet, http.MethodOptions)
+
+	protected.HandleFunc("/user/update", h.UpdateUserHandler).Methods(http.MethodPut, http.MethodOptions)
 
 	return router
 }

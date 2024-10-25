@@ -25,6 +25,7 @@ func main() {
 	_ = godotenv.Load()
 
 	time.Sleep(10 * time.Second)
+
 	port := ":8080"
 
 	Db, err := db.SetupDb()

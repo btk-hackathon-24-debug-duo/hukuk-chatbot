@@ -78,3 +78,51 @@ func (h *UserHandlers) RegisterHandler(w http.ResponseWriter, r *http.Request) {
 
 	utils.JSONResponse(w, http.StatusOK, tokenString)
 }
+
+func (h *UserHandlers) UpdateUserHandler(w http.ResponseWriter, r *http.Request) {
+	usersRepo := repository.NewUsersRepository(h.db)
+
+	var user models.User
+
+	if err := json.NewDecoder(r.Body).Decode(&user); err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	claims, ok := utils.GetTokenClaims(r)
+	if !ok {
+		utils.JSONError(w, http.StatusUnauthorized, "Token claims missing")
+		return
+	}
+
+	userID, ok := utils.GetUserIDFromClaims(claims)
+	if !ok {
+		utils.JSONError(w, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	user.Id = userID
+	user.Password = utils.HashPassword(user.Password)
+
+	result, err := usersRepo.UpdateUser(user)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	token, err := utils.CreateJWTToken(result)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	response := struct {
+		User  models.User `json:"user"`
+		Token string      `json:"token"`
+	}{
+		User:  result,
+		Token: token,
+	}
+
+	utils.JSONResponse(w, http.StatusOK, response)
+}

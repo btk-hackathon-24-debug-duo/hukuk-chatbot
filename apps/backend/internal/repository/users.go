@@ -43,3 +43,14 @@ func (u *UsersRepository) GetUserWithEmailPassword(user models.User) (models.Use
 
 	return result, nil
 }
+
+func (u *UsersRepository) UpdateUser(user models.User) (models.User, error) {
+	stmt := `UPDATE users SET first_name=$1, last_name=$2, email=$3, password=$4, updated_at=$5 WHERE id=$6 RETURNING id, first_name, last_name, email;`
+	var User models.User
+	err := u.db.QueryRow(stmt, user.FirstName, user.LastName, user.Email, user.Password, time.Now(), user.Id).Scan(&User.Id, &User.FirstName, &User.LastName, &User.Email)
+	if err != nil {
+		return models.User{}, err
+	}
+
+	return User, nil
+}
