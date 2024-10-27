@@ -61,7 +61,12 @@ func (h *ChatHandlers) SendMessageHandler(w http.ResponseWriter, r *http.Request
 
 	chatRepo := repository.NewChatRepository(h.mongoClient, h.db)
 
-	_, err := chatRepo.CreateChatMessage(message)
+	chat, err := chatRepo.GetChat(message.ChatId)
+	if err != nil || (chat.Id != "" && chat.Name != "" && chat.UserId != "") {
+		utils.JSONError(w, http.StatusBadRequest, "This chat does not exists")
+	}
+
+	_, err = chatRepo.CreateChatMessage(message)
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, "Cannot add massage")
 		return

@@ -79,6 +79,18 @@ func (r *ChatRepository) GetChats(id string) ([]models.Chat, error) {
 	return chats, nil
 }
 
+func (r *ChatRepository) GetChat(id string) (models.Chat, error) {
+	stmt := `SELECT id, user_id, name FROM chats WHERE id = $1`
+	var chat models.Chat
+
+	err := r.db.QueryRow(stmt, id).Scan(&chat.Id, &chat.UserId, &chat.Name)
+	if err != nil {
+		return models.Chat{}, err
+	}
+
+	return chat, nil
+}
+
 func (r *ChatRepository) NewChat(id, name string) (string, error) {
 	chat_id := ""
 	stmt := `INSERT INTO chats(user_id,name,created_at,updated_at) VALUES($1,$2,$3,$4) RETURNING id`
