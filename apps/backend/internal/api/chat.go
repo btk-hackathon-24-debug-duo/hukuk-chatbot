@@ -204,6 +204,7 @@ func (h *ChatHandlers) NewChat(w http.ResponseWriter, r *http.Request) {
 	var payload struct {
 		Name string `json:"name"`
 	}
+
 	if err := json.NewDecoder(r.Body).Decode(&payload); err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, err.Error())
 		return

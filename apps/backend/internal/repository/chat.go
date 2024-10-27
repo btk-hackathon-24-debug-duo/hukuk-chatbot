@@ -98,5 +98,6 @@ func (r *ChatRepository) NewChat(id, name string) (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	return chat_id, nil
 }

@@ -69,29 +69,35 @@ func SetupDb() (*sql.DB, error) {
 }
 
 func SetupTables(db *sql.DB) error {
-	stmt := `CREATE TABLE IF NOT EXISTS users ( 
-    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    first_name VARCHAR(255) NOT NULL,
-    last_name VARCHAR(255) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-CREATE TABLE IF NOT EXISTS chats (
-    id UUID DEFAULT gen_random_uuid(),
-    user_id UUID NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    PRIMARY KEY (id, user_id),
-    CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-);
-`
+	stmt := `CREATE TABLE IF NOT EXISTS users (
+		id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+		first_name VARCHAR(255) NOT NULL,
+		last_name VARCHAR(255) NOT NULL,
+		email VARCHAR(255) UNIQUE NOT NULL,
+		password VARCHAR(255) NOT NULL,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+	);`
 
 	_, err := db.Exec(stmt)
 	if err != nil {
 		return fmt.Errorf("failed to create users table: %w", err)
 	}
 
-	return nil
+	stmt = `CREATE TABLE IF NOT EXISTS chats (
+		id UUID DEFAULT gen_random_uuid(),
+		user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+		name VARCHAR(255) NOT NULL,
+		created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+		PRIMARY KEY (id, user_id)
+	);`
 
+	_, err = db.Exec(stmt)
+	if err != nil {
+		return fmt.Errorf("failed to create chats table: %w", err)
+	}
+
+	fmt.Println("tables successfully created")
+	return nil
 }
