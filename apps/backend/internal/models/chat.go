@@ -1,12 +1,11 @@
 package models
 
 type Message struct {
-	ChatId    string `json:"chat_id"`
-	UserId    string `json:"user_id"`
-	Message   string `json:"message"`
-	Category  string `json:"category"`
-	AiModel   string `json:"ai_model"`
-	Createdby string `json:"createdby"`
+	ChatId   string `json:"chat_id"`
+	UserId   string `json:"user_id"`
+	Message  string `json:"message"`
+	Category string `json:"category"`
+	AiModel  string `json:"ai_model"`
 }
 
 type Chat struct {
