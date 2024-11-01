@@ -61,7 +61,7 @@ func (h *ChatHandlers) SendMessageHandler(w http.ResponseWriter, r *http.Request
 
 	chatRepo := repository.NewChatRepository(h.mongoClient, h.db)
 
-	chat, err := chatRepo.GetChat(message.ChatId)
+	chat, err := chatRepo.GetChat(message.ChatId, userID)
 	if err != nil || (chat.Id != "" && chat.Name != "" && chat.UserId != "") {
 		utils.JSONError(w, http.StatusBadRequest, "This chat does not exists")
 	}
@@ -76,6 +76,34 @@ func (h *ChatHandlers) SendMessageHandler(w http.ResponseWriter, r *http.Request
 	result, err := h.geminiClient.GenerateContent(ctx, genai.Text(message.Message))
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, "Cannot answer")
+		return
+	}
+
+	var data models.DataModel
+	ansBytes, err := json.Marshal(result)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, "Cannot marshal answer")
+		return
+	}
+	err = json.Unmarshal(ansBytes, &data)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, "Cannot unmarshal answer")
+		return
+
+	}
+
+	answer := data.Candidates[0].Content.Parts[0]
+
+	message = &models.Message{
+		ChatId:   message.ChatId,
+		UserId:   "AI",
+		Message:  answer,
+		Category: payload.Category,
+	}
+
+	_, err = chatRepo.CreateChatMessage(message)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, "Cannot add massage")
 		return
 	}
 
@@ -100,7 +128,18 @@ func (h *ChatHandlers) GetMessages(w http.ResponseWriter, r *http.Request) {
 
 	chatRepo := repository.NewChatRepository(h.mongoClient, h.db)
 
-	messages, err := chatRepo.GetMessages(chatId, userID)
+	chat, err := chatRepo.GetChat(chatId, userID)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, "Cannot get messages"+err.Error())
+		return
+	}
+
+	if chat.Id == "" {
+		utils.JSONError(w, http.StatusBadRequest, "This chat does not exists")
+		return
+	}
+
+	messages, err := chatRepo.GetMessages(chatId)
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, "Cannot get messages"+err.Error())
 		return
@@ -159,6 +198,34 @@ func (h *ChatHandlers) SendFirstMessageHandler(w http.ResponseWriter, r *http.Re
 	ans, err := h.geminiClient.GenerateContent(ctx, genai.Text(message.Message))
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, "Cannot answer")
+		return
+	}
+
+	var data models.DataModel
+	ansBytes, err := json.Marshal(ans)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, "Cannot marshal answer")
+		return
+	}
+	err = json.Unmarshal(ansBytes, &data)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, "Cannot unmarshal answer")
+		return
+
+	}
+
+	answer := data.Candidates[0].Content.Parts[0]
+
+	message = &models.Message{
+		ChatId:   chat_id,
+		UserId:   "AI",
+		Message:  answer,
+		Category: payload.Category,
+	}
+
+	_, err = chatRepo.CreateChatMessage(message)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, "Cannot add massage")
 		return
 	}
 

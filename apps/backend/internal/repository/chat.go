@@ -36,13 +36,13 @@ func (r *ChatRepository) CreateChatMessage(message *models.Message) (*mongo.Inse
 	return result, nil
 }
 
-func (r *ChatRepository) GetMessages(chat_id, user_id string) ([]models.Message, error) {
+func (r *ChatRepository) GetMessages(chat_id string) ([]models.Message, error) {
 	ctx := context.TODO()
 
 	findOptions := options.Find()
 	findOptions.SetLimit(10)
 
-	Id := bson.M{"chatid": chat_id, "userid": user_id}
+	Id := bson.M{"chatid": chat_id}
 
 	result, err := r.mongoClient.Find(ctx, Id, findOptions)
 	if err != nil {
@@ -79,11 +79,11 @@ func (r *ChatRepository) GetChats(id string) ([]models.Chat, error) {
 	return chats, nil
 }
 
-func (r *ChatRepository) GetChat(id string) (models.Chat, error) {
-	stmt := `SELECT id, user_id, name FROM chats WHERE id = $1`
+func (r *ChatRepository) GetChat(chat_id, user_id string) (models.Chat, error) {
+	stmt := `SELECT id, user_id, name FROM chats WHERE id = $1 AND user_id = $2`
 	var chat models.Chat
 
-	err := r.db.QueryRow(stmt, id).Scan(&chat.Id, &chat.UserId, &chat.Name)
+	err := r.db.QueryRow(stmt, chat_id, user_id).Scan(&chat.Id, &chat.UserId, &chat.Name)
 	if err != nil {
 		return models.Chat{}, err
 	}

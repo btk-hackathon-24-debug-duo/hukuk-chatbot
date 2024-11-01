@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"time"
 )
 
 func EnsureValidToken(next http.Handler) http.Handler {
@@ -19,7 +20,20 @@ func EnsureValidToken(next http.Handler) http.Handler {
 
 		tokenClaims, err := decodeJWTPayload(token)
 		if err != nil {
-			fmt.Println(err)
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		//check tokenclaims is valid
+		exp, ok := tokenClaims["exp"].(float64)
+		if !ok || int64(exp) < time.Now().Unix() {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			return
+		}
+
+		id, ok := tokenClaims["user"].(map[string]interface{})["id"]
+		if !ok || id == "" {
+			http.Error(w, "Unauthorized", http.StatusUnauthorized)
 			return
 		}
 

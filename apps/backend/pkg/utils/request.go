@@ -14,7 +14,7 @@ func GetTokenClaims(r *http.Request) (map[string]any, bool) {
 // Extracts user ID from token claims
 func GetUserIDFromClaims(claims map[string]any) (string, bool) {
 	userIDInterface, ok := claims["user"].(map[string]any)["id"]
-	if !ok {
+	if !ok || userIDInterface == nil {
 		return "", false
 	}
 	userID, ok := userIDInterface.(string)
