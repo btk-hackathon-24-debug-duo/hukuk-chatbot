@@ -101,3 +101,14 @@ func (r *ChatRepository) NewChat(id, name string) (string, error) {
 
 	return chat_id, nil
 }
+
+func (r *ChatRepository) UpdateChatName(Id, userID, Name string) error {
+
+	stmt := `UPDATE chats SET name = $1, updated_at = $2 WHERE id = $3 AND user_id = $4`
+	_, err := r.db.Exec(stmt, Name, time.Now(), Id, userID)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

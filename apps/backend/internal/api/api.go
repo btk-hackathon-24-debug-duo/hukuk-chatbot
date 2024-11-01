@@ -42,6 +42,7 @@ func (r *Router) NewRouter() *mux.Router {
 	protected.HandleFunc("/chat/message", c.GetMessages).Methods(http.MethodGet, http.MethodOptions)
 
 	protected.HandleFunc("/chat/firstmessage", c.SendFirstMessageHandler).Methods(http.MethodPost, http.MethodOptions)
+	protected.HandleFunc("/chat/name", c.UpdateChatNameHandler).Methods(http.MethodPut, http.MethodOptions)
 
 	protected.HandleFunc("/chat", c.NewChat).Methods(http.MethodPost, http.MethodOptions)
 	protected.HandleFunc("/chat", c.GetChats).Methods(http.MethodGet, http.MethodOptions)

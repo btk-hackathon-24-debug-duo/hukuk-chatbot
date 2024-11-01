@@ -287,3 +287,33 @@ func (h *ChatHandlers) NewChat(w http.ResponseWriter, r *http.Request) {
 
 	utils.JSONResponse(w, http.StatusOK, result)
 }
+
+func (h *ChatHandlers) UpdateChatNameHandler(w http.ResponseWriter, r *http.Request) {
+	claims, ok := utils.GetTokenClaims(r)
+	if !ok {
+		utils.JSONError(w, http.StatusUnauthorized, "Token claims missing")
+		return
+	}
+
+	userID, ok := utils.GetUserIDFromClaims(claims)
+	if !ok {
+		utils.JSONError(w, http.StatusBadRequest, "Invalid user ID")
+		return
+	}
+
+	var chat models.Chat
+	if err := json.NewDecoder(r.Body).Decode(&chat); err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+
+	chatRepo := repository.NewChatRepository(h.mongoClient, h.db)
+
+	err := chatRepo.UpdateChatName(chat.Id, userID, chat.Name)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, "Cannot update chat name"+err.Error())
+		return
+	}
+
+	utils.JSONResponse(w, http.StatusOK, "Chat name updated")
+}

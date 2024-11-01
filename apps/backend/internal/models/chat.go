@@ -10,7 +10,7 @@ type Message struct {
 }
 
 type Chat struct {
-	Id     string `json:"id"`
+	Id     string `json:"chat_id"`
 	UserId string `json:"user_id"`
 	Name   string `json:"name"`
 }
