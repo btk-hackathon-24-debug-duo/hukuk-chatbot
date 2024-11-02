@@ -61,9 +61,10 @@ func (h *ChatHandlers) SendMessageHandler(w http.ResponseWriter, r *http.Request
 
 	chatRepo := repository.NewChatRepository(h.mongoClient, h.db)
 
-	chat, err := chatRepo.GetChat(message.ChatId, userID)
-	if err != nil || (chat.Id != "" && chat.Name != "" && chat.UserId != "") {
-		utils.JSONError(w, http.StatusBadRequest, "This chat does not exists")
+	_, err := chatRepo.GetChat(message.ChatId, userID)
+	if err != nil {
+		utils.JSONError(w, http.StatusBadRequest, "This chat does not exists"+err.Error())
+		return
 	}
 
 	_, err = chatRepo.CreateChatMessage(message)
@@ -145,7 +146,30 @@ func (h *ChatHandlers) GetMessages(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.JSONResponse(w, http.StatusOK, messages)
+	type response struct {
+		Prompt string `json:"prompt"`
+		Answer string `json:"answer"`
+	}
+
+	var messagesResponse []response
+
+	prompt := ""
+	answer := ""
+	i := 0
+	for _, message := range messages {
+		if message.UserId == userID {
+			prompt = message.Message
+			if i > 0 {
+				messagesResponse = append(messagesResponse, response{Prompt: prompt, Answer: answer})
+			}
+			answer = ""
+		} else {
+			answer = message.Message
+		}
+		i++
+	}
+
+	utils.JSONResponse(w, http.StatusOK, messagesResponse)
 }
 
 func (h *ChatHandlers) SendFirstMessageHandler(w http.ResponseWriter, r *http.Request) {
