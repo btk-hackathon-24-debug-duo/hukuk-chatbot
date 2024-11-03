@@ -1,0 +1,3 @@
+[submodule "btk-hackathon-frontend"]
+	path = btk-hackathon-frontend
+	url = https://github.com/emirhanyagci/btk-hackathon-frontend
