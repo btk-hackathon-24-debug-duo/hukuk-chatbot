@@ -38,7 +38,7 @@ PostgreSQL, ilişkisel veritabanı yönetim sistemi olarak kullanılmıştır. K
 #### MongoDB
 MongoDB, belge tabanlı bir NoSQL veritabanıdır. Chatbot mesajları gibi yapılandırılmamış veya yarı yapılandırılmış verilerin hızlı bir şekilde saklanması ve erişilmesi için kullanılmıştır. Esnek veri modeli ve yüksek performansı nedeniyle tercih edilmiştir.
 
-```json
+```
     {
         _id:"",
         chatid:"",
