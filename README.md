@@ -1,6 +1,6 @@
 # Hukuk Chatbot Projesi
 
-(Website)[https://btk-hackathon-frontend.vercel.app/login]
+https://btk-hackathon-frontend.vercel.app/login
 
 Bu proje, hukuk öğrencilerinin ve avukatların kolayca bilgilere ulaşmasını sağlayan bir chatbot uygulamasıdır. Frontend kısmında Next.js, backend kısmında ise Go kullanılmıştır.
 
