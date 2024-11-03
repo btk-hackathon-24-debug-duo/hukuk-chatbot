@@ -73,8 +73,38 @@ func (h *ChatHandlers) SendMessageHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	messages, err := chatRepo.GetMessages(message.ChatId)
+
+	type response struct {
+		Prompt string `json:"prompt"`
+		Answer string `json:"answer"`
+	}
+
+	var messagesResponse []response
+
+	prompt := ""
+	answer := ""
+	i := 0
+	for _, message := range messages {
+		if message.UserId == userID {
+			prompt = message.Message
+			if i > 0 {
+				messagesResponse = append(messagesResponse, response{Prompt: prompt, Answer: answer})
+			}
+			answer = ""
+		} else {
+			answer = message.Message
+		}
+		i++
+	}
+
 	ctx := context.Background()
-	result, err := h.geminiClient.GenerateContent(ctx, genai.Text(message.Message))
+	messagesJSON, err := json.Marshal(messagesResponse)
+	if err != nil {
+		utils.JSONError(w, http.StatusInternalServerError, "Cannot marshal messages response")
+		return
+	}
+	result, err := h.geminiClient.GenerateContent(ctx, genai.Text(messagesJSON), genai.Text(message.Message))
 	if err != nil {
 		utils.JSONError(w, http.StatusInternalServerError, "Cannot answer")
 		return
@@ -93,7 +123,7 @@ func (h *ChatHandlers) SendMessageHandler(w http.ResponseWriter, r *http.Request
 
 	}
 
-	answer := data.Candidates[0].Content.Parts[0]
+	answer = data.Candidates[0].Content.Parts[0]
 
 	message = &models.Message{
 		ChatId:   message.ChatId,
